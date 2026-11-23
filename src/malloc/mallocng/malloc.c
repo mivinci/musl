@@ -7,6 +7,11 @@
 
 #include "meta.h"
 
+#ifdef MIVINCI_NATIVE
+extern void *native_meta(size_t);
+extern void *__mmap(void *, size_t, int, int, int, off_t);
+#endif
+
 LOCK_OBJ_DEF;
 
 const uint16_t size_classes[] = {
@@ -54,6 +59,10 @@ struct meta *alloc_meta(void)
 	if (pagesize < 4096) pagesize = 4096;
 	if ((m = dequeue_head(&ctx.free_meta_head))) return m;
 	if (!ctx.avail_meta_count) {
+#ifdef MIVINCI_NATIVE
+		p = native_meta(pagesize);
+		if (!p) return 0;
+#else
 		int need_unprotect = 1;
 		if (!ctx.avail_meta_area_count && ctx.brk!=-1) {
 			uintptr_t new = ctx.brk + pagesize;
@@ -94,6 +103,7 @@ struct meta *alloc_meta(void)
 				return 0;
 		ctx.avail_meta_area_count--;
 		ctx.avail_meta_areas = p + 4096;
+#endif
 		if (ctx.meta_area_tail) {
 			ctx.meta_area_tail->next = (void *)p;
 		} else {
