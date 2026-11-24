@@ -1,8 +1,8 @@
 #include "stdio_impl.h"
 #include <sys/uio.h>
 
-#ifdef MIVINCI_NATIVE
-hidden ssize_t __mivinci_stdio_write(int, const void *, size_t, const void *, size_t);
+#ifdef KERNEL_NATIVE
+hidden ssize_t __kernel_stdio_write(int, const void *, size_t, const void *, size_t);
 #endif
 
 size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
@@ -16,8 +16,8 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 	int iovcnt = 2;
 	ssize_t cnt;
 	for (;;) {
-#ifdef MIVINCI_NATIVE
-		cnt = __mivinci_stdio_write(f->fd, iov[0].iov_base, iov[0].iov_len,
+#ifdef KERNEL_NATIVE
+		cnt = __kernel_stdio_write(f->fd, iov[0].iov_base, iov[0].iov_len,
 			iovcnt == 2 ? iov[1].iov_base : 0, iovcnt == 2 ? iov[1].iov_len : 0);
 		if (!cnt && rem) { errno = EIO; cnt = -1; }
 #else

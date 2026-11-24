@@ -4,7 +4,7 @@
 size_t __stdout_write(FILE *f, const unsigned char *buf, size_t len)
 {
 	f->write = __stdio_write;
-#ifdef MIVINCI_NATIVE
+#ifdef KERNEL_NATIVE
 	if (!(f->flags & F_SVB)) f->lbf = -1;
 #else
 	struct winsize wsz;

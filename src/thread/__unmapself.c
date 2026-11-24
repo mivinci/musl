@@ -4,7 +4,7 @@
 /* cheat and reuse CRTJMP macro from dynlink code */
 #include "dynlink.h"
 
-#ifdef MIVINCI_NATIVE
+#ifdef KERNEL_NATIVE
 void __unmapself(void *base, size_t size)
 {
 	(void)base;

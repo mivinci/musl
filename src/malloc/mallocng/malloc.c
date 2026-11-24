@@ -7,7 +7,7 @@
 
 #include "meta.h"
 
-#ifdef MIVINCI_NATIVE
+#ifdef KERNEL_NATIVE
 extern void *native_meta(size_t);
 extern void *__mmap(void *, size_t, int, int, int, off_t);
 #endif
@@ -59,7 +59,7 @@ struct meta *alloc_meta(void)
 	if (pagesize < 4096) pagesize = 4096;
 	if ((m = dequeue_head(&ctx.free_meta_head))) return m;
 	if (!ctx.avail_meta_count) {
-#ifdef MIVINCI_NATIVE
+#ifdef KERNEL_NATIVE
 		p = native_meta(pagesize);
 		if (!p) return 0;
 #else

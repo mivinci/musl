@@ -1,5 +1,5 @@
-#ifdef MIVINCI_NATIVE
-#include "mivinci_syscall.h"
+#ifdef KERNEL_NATIVE
+#include "kernel_syscall.h"
 #else
 #define __SYSCALL_LL_E(x) (x)
 #define __SYSCALL_LL_O(x) (x)
