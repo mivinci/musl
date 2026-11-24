@@ -5,8 +5,14 @@
 
 hidden void __restore()
 {
+#ifdef MIVINCI_NATIVE
+	__builtin_trap();
+#endif
 }
 
 hidden void __restore_rt()
 {
+#ifdef MIVINCI_NATIVE
+	__builtin_trap();
+#endif
 }

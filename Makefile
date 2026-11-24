@@ -22,7 +22,12 @@ SRC_DIRS = $(addprefix $(srcdir)/,src/* src/malloc/$(MALLOC_DIR) crt ldso $(COMP
 BASE_GLOBS = $(addsuffix /*.c,$(SRC_DIRS))
 ARCH_GLOBS = $(addsuffix /$(ARCH)/*.[csS],$(SRC_DIRS))
 BASE_SRCS = $(sort $(wildcard $(BASE_GLOBS)))
-ARCH_SRCS = $(sort $(wildcard $(ARCH_GLOBS)))
+ifeq ($(MIVINCI_NATIVE),1)
+# Use the C fallbacks on the native port; Linux trap stubs cannot be linked.
+NATIVE_EXCLUDED_ASM = %/vfork.s %/restore.s %/clone.s %/__unmapself.s %/syscall_cp.s
+override CPPFLAGS += -DMIVINCI_NATIVE
+endif
+ARCH_SRCS = $(filter-out $(NATIVE_EXCLUDED_ASM),$(sort $(wildcard $(ARCH_GLOBS))))
 BASE_OBJS = $(patsubst $(srcdir)/%,%.o,$(basename $(BASE_SRCS)))
 ARCH_OBJS = $(patsubst $(srcdir)/%,%.o,$(basename $(ARCH_SRCS)))
 REPLACED_OBJS = $(sort $(subst /$(ARCH)/,/,$(ARCH_OBJS)))
@@ -37,6 +42,9 @@ LOBJS = $(LIBC_OBJS:.o=.lo)
 GENH = obj/include/bits/alltypes.h obj/include/bits/syscall.h
 GENH_INT = obj/src/internal/version.h
 IMPH = $(addprefix $(srcdir)/, src/internal/stdio_impl.h src/internal/pthread_impl.h src/internal/locale_impl.h src/internal/libc.h)
+ifeq ($(MIVINCI_NATIVE),1)
+IMPH += $(srcdir)/arch/$(ARCH)/syscall_arch.h $(srcdir)/src/internal/mivinci_syscall.h
+endif
 
 LDFLAGS =
 LDFLAGS_AUTO =

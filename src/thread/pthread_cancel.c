@@ -30,7 +30,11 @@ long __syscall_cp_c(syscall_arg_t nr,
 	    && (st==PTHREAD_CANCEL_DISABLE || nr==SYS_close))
 		return __syscall(nr, u, v, w, x, y, z);
 
+#ifdef MIVINCI_NATIVE
+	r = __syscall(nr, u, v, w, x, y, z);
+#else
 	r = __syscall_cp_asm(&self->cancel, nr, u, v, w, x, y, z);
+#endif
 	if (r==-EINTR && nr!=SYS_close && self->cancel &&
 	    self->canceldisable != PTHREAD_CANCEL_DISABLE)
 		r = __cancel();
@@ -61,6 +65,7 @@ static void cancel_handler(int sig, siginfo_t *si, void *ctx)
 		__cancel();
 	}
 
+#ifndef MIVINCI_NATIVE
 	if (pc >= (uintptr_t)__cp_begin && pc < (uintptr_t)__cp_end) {
 		uc->uc_mcontext.MC_PC = (uintptr_t)__cp_cancel;
 #ifdef CANCEL_GOT
@@ -68,6 +73,9 @@ static void cancel_handler(int sig, siginfo_t *si, void *ctx)
 #endif
 		return;
 	}
+#else
+	(void)pc;
+#endif
 
 	__syscall(SYS_tkill, self->tid, SIGCANCEL);
 }
@@ -91,6 +99,10 @@ static void init_cancellation()
 
 int pthread_cancel(pthread_t t)
 {
+#ifdef MIVINCI_NATIVE
+	(void)t;
+	return ENOSYS;
+#else
 	static int init;
 	if (!init) {
 		init_cancellation();
@@ -103,4 +115,5 @@ int pthread_cancel(pthread_t t)
 		return 0;
 	}
 	return pthread_kill(t, SIGCANCEL);
+#endif
 }

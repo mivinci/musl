@@ -4,6 +4,15 @@
 /* cheat and reuse CRTJMP macro from dynlink code */
 #include "dynlink.h"
 
+#ifdef MIVINCI_NATIVE
+void __unmapself(void *base, size_t size)
+{
+	(void)base;
+	(void)size;
+	/* No thread can own a separate stack until native creation is supported. */
+	__builtin_trap();
+}
+#else
 static void *unmap_base;
 static size_t unmap_size;
 static char shared_stack[256];
@@ -22,3 +31,4 @@ void __unmapself(void *base, size_t size)
 	unmap_size = size;
 	CRTJMP(do_unmap, stack);
 }
+#endif

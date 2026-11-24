@@ -1,3 +1,6 @@
+#ifdef MIVINCI_NATIVE
+#include "mivinci_syscall.h"
+#else
 #define __SYSCALL_LL_E(x) (x)
 #define __SYSCALL_LL_O(x) (x)
 
@@ -76,3 +79,4 @@ static inline long __syscall6(long n, long a, long b, long c, long d, long e, lo
 #define VDSO_CGT_VER "LINUX_2.6.39"
 
 #define IPC_64 0
+#endif
